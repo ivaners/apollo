@@ -61,7 +61,7 @@ metadata:
     app: statefulset-apollo-config-server-dev
 spec:
   serviceName: service-apollo-meta-server-dev
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: pod-apollo-config-server-dev
@@ -71,9 +71,6 @@ spec:
     metadata:
       labels:
         app: pod-apollo-config-server-dev
-    spec:
-      nodeSelector:
-        node: "apollo"
 
       volumes:
         - name: volume-configmap-apollo-config-server-dev
