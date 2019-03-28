@@ -68,7 +68,7 @@ spec:
                 path: apollo-env.properties
 
       containers:
-        - image: apollo-portal-server:v1.0.0    # 更改为你的 docker registry 下的 image
+        - image: ivaners/apollo-portal-server:v1.0.0    # 更改为你的 docker registry 下的 image
           securityContext:
             privileged: true
           imagePullPolicy: IfNotPresent

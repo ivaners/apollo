@@ -63,7 +63,7 @@ spec:
                 path: application-github.properties
 
       containers:
-        - image: apollo-admin-server:v1.0.0
+        - image: ivaners/apollo-admin-server:v1.0.0
           securityContext:
             privileged: true
           imagePullPolicy: IfNotPresent
