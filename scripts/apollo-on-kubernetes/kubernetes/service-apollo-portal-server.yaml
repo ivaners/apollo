@@ -7,11 +7,9 @@ metadata:
   name: configmap-apollo-portal-server
 data:
   application-github.properties: |
-    spring.datasource.url = jdbc:mysql://service-mysql-for-portal-server.sre:3306/ApolloPortalDB?characterEncoding=utf8
-    # mysql username
-    spring.datasource.username = FillInCorrectUser
-    # mysql password
-    spring.datasource.password = FillInCorrectPassword
+    spring.datasource.url = jdbc:mysql://rm-wz9vu97c4a7s6lbr17o.mysql.rds.aliyuncs.com:3306/ApolloPortalDB?characterEncoding=utf8
+    spring.datasource.username = root
+    spring.datasource.password = mXej%mXaANegxzNTT8cs+8hLQXAQbLYZ
   apollo-env.properties: |
     dev.meta=http://service-apollo-config-server-dev.sre:8080
 
@@ -44,7 +42,6 @@ metadata:
   labels:
     app: deployment-apollo-portal-server
 spec:
-  # 3 个实例
   replicas: 1
   selector:
     matchLabels:
@@ -58,7 +55,8 @@ spec:
     metadata:
       labels:
         app: pod-apollo-portal-server
-      
+    spec:
+
       volumes:
         - name: volume-configmap-apollo-portal-server
           configMap:
@@ -68,22 +66,7 @@ spec:
                 path: application-github.properties
               - key: apollo-env.properties
                 path: apollo-env.properties
-      
-      initContainers:
-        # 确保 admin-service 正常提供服务
-        - image: alpine-bash:3.8
-          name: check-service-apollo-admin-server-dev
-          command: ['bash', '-c', "curl --connect-timeout 2 --max-time 5 --retry 60 --retry-delay 1 --retry-max-time 120 service-apollo-admin-server-dev.sre:8090"]
-        - image: alpine-bash:3.8
-          name: check-service-apollo-admin-server-alpha
-          command: ['bash', '-c', "curl --connect-timeout 2 --max-time 5 --retry 60 --retry-delay 1 --retry-max-time 120 service-apollo-admin-server-test-alpha.sre:8090"]
-        - image: alpine-bash:3.8
-          name: check-service-apollo-admin-server-beta
-          command: ['bash', '-c', "curl --connect-timeout 2 --max-time 5 --retry 60 --retry-delay 1 --retry-max-time 120 service-apollo-admin-server-test-beta.sre:8090"]
-        - image: alpine-bash:3.8
-          name: check-service-apollo-admin-server-prod
-          command: ['bash', '-c', "curl --connect-timeout 2 --max-time 5 --retry 60 --retry-delay 1 --retry-max-time 120 service-apollo-admin-server-prod.sre:8090"]    
-      
+
       containers:
         - image: apollo-portal-server:v1.0.0    # 更改为你的 docker registry 下的 image
           securityContext:
@@ -93,7 +76,7 @@ spec:
           ports:
             - protocol: TCP
               containerPort: 8070
-          
+
           volumeMounts:
             - name: volume-configmap-apollo-portal-server
               mountPath: /apollo-portal-server/config/application-github.properties
@@ -101,23 +84,9 @@ spec:
             - name: volume-configmap-apollo-portal-server
               mountPath: /apollo-portal-server/config/apollo-env.properties
               subPath: apollo-env.properties
-          
+
           env:
             - name: APOLLO_PORTAL_SERVICE_NAME
               value: "service-apollo-portal-server.sre"
-          
-          readinessProbe:
-            tcpSocket:
-              port: 8070
-            initialDelaySeconds: 10
-            periodSeconds: 5
-          
-          livenessProbe:
-            tcpSocket:
-              port: 8070
-            # 120s 内, server 未启动则重启 container
-            initialDelaySeconds: 120
-            periodSeconds: 15
-          
-      dnsPolicy: ClusterFirst
+
       restartPolicy: Always
